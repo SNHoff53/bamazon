@@ -15,22 +15,50 @@ connection.connect(function(err) {
     // console.log("connected as id " + connection.threadId + "\n");
     // run the start function after the connection is made to prompt the user
     displayAvailableItems();
+
   });
 
+
 function displayAvailableItems(){
-    connection.query("SELECT * FROM products", function(err, res){
+    console.log("\n Hello! Welcome to Bamazon! Below are some of our products available for purchase.\n");
+    
+        connection.query("SELECT * FROM products", function(err, res){
         if (err) throw err;
-        console.log("---------------------- Available Items ----------------------");
         for (var i = 0; i < res.length; i++){
         console.log(
+            "\n",
             "Product ID: " + res[i].item_id + "\n",
             "Product Name: " + res[i].product_name + "\n",
             "Product Price: " + res[i].price + "\n",
             )
         }
         console.log("----------------------------------------------------");
-    });
+        // console.log(res);
+        });
+    
+    // connection.end();
     customerInquiryAlert();
+    
 }
 
 
+function customerInquiryAlert() {
+    connection.query("SELECT * FROM products", function(err, results) {
+        if (err) throw err;
+        inquirer
+        .prompt([
+            {
+              name: "choice",
+              type: "rawlist",
+              choices: function() {
+                var customerChoiceArray = [];
+                for (var i = 0; i < results.length; i++) {
+                  customerChoiceArray.push(results[i].item_id);
+                }
+                return customerChoiceArray;
+              },
+              message: "What product would you like to buy? Please choose from the following item ID numbers."
+            }
+          ]);
+    })
+}
