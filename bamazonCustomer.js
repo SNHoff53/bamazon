@@ -41,14 +41,13 @@ function displayAvailableItems(){
     
 }
 
-
 function customerInquiryAlert() {
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
         inquirer
         .prompt([
             {
-              name: "choice",
+              name: "itemChoice",
               type: "rawlist",
               choices: function() {
                 var customerChoiceArray = [];
@@ -58,7 +57,20 @@ function customerInquiryAlert() {
                 return customerChoiceArray;
               },
               message: "What product would you like to buy? Please choose from the following item ID numbers."
+            },
+            {
+                name: "unitChoice",
+                type: "input",
+                message: "How many units of the product would you like to purchase?"
             }
-          ]);
-    })
+          ])
+          .then(function(answer) {
+              var itemThatWasChosen;
+              for (var j = 0; j < results.length; j++) {
+                if (results[j].item_id === answer.choice) {
+                    itemThatWasChosen = results[j];
+                }
+              }
+          })
+    });
 }
