@@ -70,7 +70,7 @@ function customerInquiryAlert() {
                     connection.query("UPDATE products SET stock_quantity=? WHERE id=", 
                     [res[0].stock_quantity - unitsRequested], 
                     function(err, inventory) {
-                        // if(err) throw err;
+                        if(err) throw err;
                     })
 
                     console.log("Thank you for your purchase. Your order was successful.");
