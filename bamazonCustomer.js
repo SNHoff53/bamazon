@@ -19,7 +19,7 @@ connection.connect(function(err) {
 function displayItems(){
     console.log("\n Hello! Welcome to Bamazon! Below are some of our products available for purchase.\n");
         connection.query("SELECT * FROM products", function(err, res){
-        // if (err) throw err;
+        if (err) throw err;
         for (var i = 0; i < res.length; i++){
         console.log(
             "\n",
@@ -39,13 +39,13 @@ function customerInquiryAlert() {
         if (err) throw err;
         inquirer.prompt ([
             {
-                name: "item",
                 type: "number",
+                name: "item",
                 message: "What product would you like to buy? Please choose one ID number from the list above."
             },
             {
-                name: "numberOfUnits",
                 type: "number",
+                name: "numberOfUnits",
                 message: "How many units of the product would you like to purchase?"
             }
         ])
@@ -67,22 +67,22 @@ function customerInquiryAlert() {
                 if (res[0].stock_quantity - answer.numberOfUnits >= 0) {
                     var purchaseOrder = unitsRequested * res[0].price;
 
-                    console.log("Thank you for your purchase. Your order was successful.");
-                    console.log("The total amount charged is $" + purchaseOrder + ".");
-                    console.log("Quantity of " + res[0].product_name + " left in stock: " + res[0].stock_quantity + " .");
-                    console.log("----------------------------------------------------");
-
                     connection.query("UPDATE products SET stock_quantity=? WHERE id=", 
-                    [res[0].stock_quantity - unitsRequested, itemChosen], 
+                    [res[0].stock_quantity - unitsRequested], 
                     function(err, inventory) {
                         // if(err) throw err;
                     })
+
+                    console.log("Thank you for your purchase. Your order was successful.");
+                    console.log("The total amount charged is $" + purchaseOrder + ".");
+                    console.log("Quantity of " + res[0].product_name + " left in stock: " + res[0].stock_quantity + ".");
+                    console.log("----------------------------------------------------");
+                    
                 } else {
                     console.log(
-                        "Insufficient quantity! Sorry, there are not enough units of " + res[0].product_name + ". Please update your number of units."
-                    + "\nThe current number of units available for " + res[0].product_name + " is " + res[0].stock_quantity + ".");
+                        "Insufficient quantity! Sorry, there are not enough units of " + res[0].product_name + "."
+                    + "\nThe current number of available units are " + res[0].stock_quantity + ".")
                 }
-                displayItems();
             });
             connection.end();
         });
