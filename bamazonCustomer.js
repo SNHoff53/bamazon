@@ -12,102 +12,77 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function(err) {
     if (err) throw err;
-    // console.log("Hello! Welcome to Bamazon! Below are some of our products available for purchase " + connection.threadId + "\n");
-    // run the displayAvailableItms function after the connection is made to initiate the prompt
+    console.log("Connected to bamazon_DB in MySQL.");
     displayItems();
   });
 
 function displayItems(){
     console.log("\n Hello! Welcome to Bamazon! Below are some of our products available for purchase.\n");
         connection.query("SELECT * FROM products", function(err, res){
-        if (err) throw err;
+        // if (err) throw err;
         for (var i = 0; i < res.length; i++){
         console.log(
             "\n",
             "Product ID: " + res[i].item_id + "\n",
             "Product Name: " + res[i].product_name + "\n",
-            "Product Price: " + res[i].price + "\n",
+            "Product Price: $ " + res[i].price + "\n",
             )
         }
         console.log("----------------------------------------------------");
         // console.log(res);
         });
-    // connection.end();
     customerInquiryAlert();
 };
 
 function customerInquiryAlert() {
-    // quering the database for items
-    connection.query("SELECT * FROM products", function(err, results) {
+    connection.query("SELECT * FROM products", function(err, res) {
         if (err) throw err;
-        // displaying the items in the available items list then...
-        inquirer
-        .prompt([
+        inquirer.prompt ([
             {
-              name: "itemID",
-              type: "rawlist",
-              message: "What product would you like to buy? Please choose from the following item ID numbers.",
-              validate: function(value) {
-                if (isNaN(value) === false) {
-                  return true;
-                }
-                return false;
-              }
+                name: "item",
+                type: "number",
+                message: "What product would you like to buy? Please choose one ID number from the list above."
             },
             {
-            // then asking the customer how many units the chosen product they would like
-                name: "unitNumber",
-                type: "input",
-                message: "How many units of the product would you like to purchase?",
-                validate: function(value) {
-                    if (isNaN(value) === false) {
-                      return true;
-                    }
-                    return false;
-                }
+                name: "numberOfUnits",
+                type: "number",
+                message: "How many units of the product would you like to purchase?"
             }
         ])
         .then(function(answer) {
-
-            // get the customer's answers for their chosenProduct and their unitNumber entry and store in variable; console.log answers
-              var customerChoice = answer.chosenProduct;
-              console.log("You chose the item id: " , customerChoice);
-              var numberOfUnitsEntered = answer.unitNumber;
-              console.log("The number of units chosen from stock: " , numberOfUnitsEntered);
+            // get the customer's answers for their chosenProduct and their quantity choice and store in variable; console.log answers
+              var itemChosen = answer.item;
+              console.log("You chose item number " + itemChosen + ".");
+              var unitsRequested = answer.numberOfUnits;
+              console.log("You have chosen to purchase " + unitsRequested + " units.");
 
             // then we are gathering the information of the chosen product and checking the sql table
-            connection.query("SELECT * FROM products WHERE ?", [{item_id: answer.chosenProduct}], function(err, res) {
+            connection.query("SELECT * FROM products WHERE ?", [{ 
+                item_id : answer.item 
+            }] ,function(err, res) {
+                
                 if (err) throw err;
 
-            // checking our math -- is the customer's unit entry more or less than the item's stock quanity?
-                // setting current quantity to the item's quantity
-                var currentStockQuanity = res[0].stock_quantity;
-                // setting price to the item's current price
-                var price = res[0].price;
-                // calculating the remaining quantity
-                var remaining_quantity = currentStockQuanity - answer.unitNumber;
-                
-            // if the customer's unitNumber is greater than an item's stock quantity...
-                if (res[0].stock_quantity < answer.unitNumber) {
-                    console.log("Insufficient quantity! Sorry, there are not enough units of " + res[0].product_name + ". Please update your number of units."
-                    + "\nThe current number of units available for " + res[0].product_name + "is " + res[0].stock_quantity + ".");
-                }
-                else {
-                    (currentStockQuanity > answer.unitNumber)
-                        console.log("Quantity of chosen item remaining: " + remaining_quantity);
-                        console.log("Total cost: " + (answer.unitNumber * price) + "\n");
+            // if the customer's quantity choice is greater than an item's stock quantity...
+                if (res[0].stock_quantity - answer.numberOfUnits >= 0) {
+                    var purchaseOrder = unitsRequested * res[0].price;
 
-                        connection.query("UPDATE products SET stock_quantity=? WHERE item_id=?," [remaining_quantity, answer.chosenProduct], function(err, res) { 
-                        });
+                    console.log("Thank you for your purchase. Your order was successful.");
+                    console.log("The total amount charged is $" + purchaseOrder + ".");
+                    console.log("Quantity of " + res[0].product_name + " left in stock: " + res[0].stock_quantity + " .");
+                    console.log("----------------------------------------------------");
 
-                        connection.query("SELECT * FROM products", function(err, res) {
-                            if (err) throw err;
-                            console.log("Purchase confirmed");
-                            console.log("Here is the updated inventory of the product items:" );
-                            console.log("----------------------------------------------------");
-                            displayItems(res);
-                        });
+                    connection.query("UPDATE products SET stock_quantity=? WHERE id=", 
+                    [res[0].stock_quantity - unitsRequested, itemChosen], 
+                    function(err, inventory) {
+                        // if(err) throw err;
+                    })
+                } else {
+                    console.log(
+                        "Insufficient quantity! Sorry, there are not enough units of " + res[0].product_name + ". Please update your number of units."
+                    + "\nThe current number of units available for " + res[0].product_name + " is " + res[0].stock_quantity + ".");
                 }
+                displayItems();
             });
             connection.end();
         });
