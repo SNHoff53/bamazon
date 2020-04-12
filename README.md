@@ -1,7 +1,7 @@
 # bamazon
 
 ## Overview --
-This application is an Amazon-like-storefront, using MySQL. The app takes in orders from customers and depletes the stock amount from the store's inventory. 
+This bamazon application is an Amazon-like-storefront, using MySQL. The app takes in orders from customers and depletes the stock amount from the store's inventory. 
 
 ## Technologies Used -- 
 * [Node.js]
