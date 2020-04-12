@@ -16,6 +16,7 @@ connection.connect(function(err) {
     displayItems();
   });
 
+  // creating a function to display items in product list
 function displayItems(){
     console.log("\n Hello! Welcome to Bamazon! Below are some of our products available for purchase.\n");
         connection.query("SELECT * FROM products", function(err, res){
