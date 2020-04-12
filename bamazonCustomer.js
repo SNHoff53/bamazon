@@ -35,6 +35,7 @@ function displayItems(){
     customerInquiryAlert();
 };
 
+// creating a function that prompts the user - asks what product they would like to purchase
 function customerInquiryAlert() {
     connection.query("SELECT * FROM products", function(err, res) {
         if (err) throw err;
