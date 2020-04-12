@@ -68,7 +68,6 @@ function customerInquiryAlert() {
             // if the customer's quantity choice is greater than an item's stock quantity...
                 if (res[0].stock_quantity - answer.numberOfUnits >= 0) {
                     var purchaseOrder = unitsRequested * res[0].price;
-
                     connection.query("UPDATE products SET stock_quantity=? WHERE id=", 
                     [res[0].stock_quantity - unitsRequested], 
                     function(err, inventory) {
